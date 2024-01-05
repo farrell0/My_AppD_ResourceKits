@@ -1,11 +1,10 @@
 My Cisco/AppDynamics -- Resource Kits
 ===================
 
-| **[vers. 0.6.alpha](https://github.com/farrell0/My_AppD_ResourceKits/blob/master/README.md)**| **[vers. 0.7 - Coming](https://github.com/farrell0/My_AppD_ResourceKits/blob/master/v.0.7/README.md)**|
+| **[vers. 0.6.alpha](https://github.com/farrell0/My_AppD_ResourceKits/tree/main/v.0.6)**| **[vers. 0.7 - Coming](https://github.com/farrell0/My_AppD_ResourceKits/blob/master/v.0.7/README.md)**|
 |-------------------------|--------------------------|
 
 This is a personal blog where I post programs, data files, other (a Resource Kit), used in the delivery of serveral "Lunch and Learns" using the Cisco/AppDynamics full stack observability platform. 
-
 
 vers. 0.6.alpha - -  Python single page Web app, MongoDB database in a 2-node replica set, additional readers and writers, and more.
 
