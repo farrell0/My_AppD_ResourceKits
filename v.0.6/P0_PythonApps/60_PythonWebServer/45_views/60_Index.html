@@ -1,0 +1,1023 @@
+
+
+<!-- -----------------------------------------------------------
+----------------------------------------------------------------
+
+   MongoDB; Geo-hash demonstration program.
+
+----------------------------------------------------------------
+---- ------------------------------------------------------- -->
+
+
+<!DOCTYPE html>
+<html>
+
+
+<!-- ------------------------------------------------------- -->
+<!-- ------------------------------------------------------- -->
+<!-- ------------------------------------------------------- -->
+<!-- ------------------------------------------------------- -->
+
+
+<head>
+
+   <meta charset="utf-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+   <!--
+   Eliminates the error; """GET /favicon.ico HTTP/1.1 404 -
+   -->
+   <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+
+   <!-- -------------------------------------------------------
+   This block required for jQuery, which gives us Ajax support.
+   --------------------------------------------------------- -->
+   <link rel="stylesheet" type="text/css"
+      href="{{ url_for('static', filename=
+      '10_bootstrap.min.css')|autoversion}}">
+   <script src="{{ url_for('static', filename=
+      '11_jquery.min.js')|autoversion }}">
+   </script>
+
+   <!-- -------------------------------------------------------
+   This block required for the TABbed DIVs.
+   --------------------------------------------------------- -->
+   <link rel="stylesheet" type="text/css"
+      href="{{ url_for('static', filename=
+      '20_TABbedMenu.css')|autoversion}}">
+   <script src="{{ url_for('static', filename=
+      '21_TABbedMenu.js')|autoversion}}">
+   </script>
+	
+   <!-- -------------------------------------------------------
+   This block required for Leaflet, which give us our maps.
+   --------------------------------------------------------- -->
+   <link rel="stylesheet" type="text/css"
+      href="{{ url_for('static', filename=
+      '24_leaflet.css')|autoversion}}">
+   <script src="{{ url_for('static', filename=
+      '25_leaflet.js')|autoversion}}">
+   </script>
+
+
+   <!-- -------------------------------------------------------
+   Used for the vertical sliders.
+   --------------------------------------------------------- -->
+   <style>
+   input.vertical {
+      -webkit-appearance: slider-vertical;
+      writing-mode: bt-lr;
+      }
+   </style>
+
+</head>
+
+
+<!-- ------------------------------------------------------- -->
+<!-- ------------------------------------------------------- -->
+<!-- ------------------------------------------------------- -->
+<!-- ------------------------------------------------------- -->
+
+
+<body>
+
+   <br>
+   <h1>
+      <span style="color:#009900">
+      MongoDB -- Geo-spatial demonstration program.
+      </span>
+   </h1>
+   <br>
+
+   <table border=0>
+      <tr>
+         <td style="width:600px">
+            <table border=0>
+
+               <td>
+                  <!-- --------------------------------------------------------
+                  Instructions; How to use this form.
+                  --------------------------------------------------------- -->
+                  <ul>
+                     <li>
+                     CLICK-AND-HOLD, then DRAG/RELEASE, to move the map.
+                     </li>
+                     <li>
+                     CLICK to set an Orange Pin in the map, which becomes the
+                     (query reference point: your location).
+                     </li>
+                     <br>
+                     <br>
+                     <li>
+                     (The single Orange Pin represents your location. The Blue
+                     Pins represent locations you have queried; balloon help
+                     pops-up on Hover over Blue Pins.)
+                     </li>
+                     <br>
+                     <li>
+                     Change the Compass and Speedometer as you see fit; low
+                     speeds equate to walking, and will query a bounding box,
+                     higher speeds equate to driving, and will query a (direction).
+                     </li>
+                  </ul>
+               </td>
+
+               <td>
+                  <!-- --------------------------------------------------------
+                  Visual control for direction
+                  --------------------------------------------------------- -->
+                  <img id="img_compass" src="{{url_for('static', filename=
+                     './images/compass_0.png')|autoversion}}" width="120"
+                     height="120">
+                  <br>
+                  <br>
+                  <label for="slider_compass">Direction</label>
+                  <input type="range" min="0" max="360" value="0" step="45" id="slider_compass"
+                     class="vertical" orient="vertical" oninput="f_updateCompass(value)"
+                     list="slider_compass_settings" onchange="f_onChange1()">
+                  <datalist id="slider_compass_settings">
+                     <option>0</option>
+                     <option>45</option>
+                     <option>90</option>
+                     <option>135</option>
+                     <option>180</option>
+                     <option>225</option>
+                     <option>270</option>
+                     <option>315</option>
+                     <option>360</option>
+                  </datalist>
+               
+                  <script>
+                     function f_updateCompass(heading) {
+                        if (heading == 0 || heading ==360) {
+                           document.querySelector('#img_compass').src =
+                              "{{ url_for('static', filename=
+                              './images/compass_0.png')|autoversion}}";
+                        } else if (heading == 45) {
+                           document.querySelector('#img_compass').src = 
+                              "{{ url_for('static', filename=
+                              './images/compass_45.png')|autoversion}}";
+                        } else if (heading == 90) {
+                           document.querySelector('#img_compass').src = 
+                              "{{ url_for('static', filename=
+                              './images/compass_90.png')|autoversion}}";
+                        } else if (heading == 135) {
+                           document.querySelector('#img_compass').src = 
+                              "{{ url_for('static', filename=
+                              './images/compass_135.png')|autoversion}}";
+                        } else if (heading == 180) {
+                           document.querySelector('#img_compass').src = 
+                              "{{ url_for('static', filename=
+                              './images/compass_180.png')|autoversion}}";
+                        } else if (heading == 225) {
+                           document.querySelector('#img_compass').src = 
+                              "{{ url_for('static', filename=
+                              './images/compass_225.png')|autoversion}}";
+                        } else if (heading == 270) {
+                           document.querySelector('#img_compass').src = 
+                              "{{ url_for('static', filename=
+                              './images/compass_270.png')|autoversion}}";
+                        } else {
+                           document.querySelector('#img_compass').src = 
+                              "{{ url_for('static', filename=
+                              './images/compass_315.png')|autoversion}}";
+                           }
+                        }
+                  </script>
+               </td>
+
+               <td>
+                  <!-- --------------------------------------------------------
+                  Visual control for speed
+                  --------------------------------------------------------- -->
+                  <br>
+                  <br>
+                  <img id="img_speed" src="{{ url_for('static', filename=
+                     './images/person.png')|autoversion}}" width="100"
+                     height="100">
+                  <br>
+                  <br>
+                  <label for="slider_speed">Speed</label>
+                  <input type="range" min="0" max="80" value="0" id="slider_speed" 
+                     step="10" oninput="f_updateSpeed(value)" onchange="f_onChange1()"
+                     class="vertical" orient="vertical" list="slider_speed_settings">
+                  <output for="slider_speed" id="output_speed_gauge">Walking</output>
+                  <datalist id="slider_speed_settings">
+                     <option>0</option>
+                     <option>10</option>
+                     <option>20</option>
+                     <option>30</option>
+                     <option>40</option>
+                     <option>50</option>
+                     <option>60</option>
+                     <option>70</option>
+                     <option>80</option>
+                  </datalist>
+               
+                  <script>
+                     function f_updateSpeed(speed) {
+                        if (speed < 10) {
+                           document.querySelector('#output_speed_gauge').value = "Walking";
+                              //
+                           document.querySelector('#img_speed').src =
+                              "{{ url_for('static', filename=
+                              './images/person.png')|autoversion}}";
+                        } else if (speed < 40) {
+                           document.querySelector('#output_speed_gauge').value = "Driving Slow - " + speed;
+                              //
+                           document.querySelector('#img_speed').src =
+                              "{{ url_for('static', filename=
+                              './images/jeep.png')|autoversion}}";
+                        } else {
+                           document.querySelector('#output_speed_gauge').value = "Driving Fast - " + speed;
+                              //
+                           document.querySelector('#img_speed').src =
+                              "{{ url_for('static', filename=
+                              './images/jeep.png')|autoversion}}";
+                           }
+                        }
+                  </script>
+               </td>
+
+            </table>
+         </td>
+         <td>
+            <!-- --------------------------------------------------------
+            div for the map proper
+            <div id="div_map" style="width: 720px; height: 480px;"></div>
+            --------------------------------------------------------- -->
+            <div id="div_map" style="width: 1200px; height: 600px;"></div>
+            </div>
+            <p style="color:gray">
+            Maps data by: OpenStreetMaps and Leaflet.js
+            &nbsp&nbsp&nbsp&nbsp
+            Location data: 2012 Yelp public data set.
+            <br>
+            Expect Colorado-only data for all businesses other than Starbuck's Coffee. (1680x1050)
+            </p>
+           <br>
+            &nbsp&nbsp&nbsp&nbsp
+            <input onclick="f_clearDataPins();" type=button value="Clear Pins from Map">
+            &nbsp&nbsp&nbsp&nbsp
+            Query filter (text/name) for Locations: 
+            <input type="text" id="it_textFilter" size="32"
+               onchange="f_onChange2()">
+         </td>
+      </tr>
+   </table>
+
+
+   <!-- --------------------------------------------------------
+   Script that runs the map
+   --------------------------------------------------------- -->
+
+   <script>
+
+      var l_mymap = L.map('div_map').setView([40.5259, -104.9263], 10);
+      
+      //  l_pinsRefArr[] keeps the blue pins we return and render from 
+      //  queries; effectively, the (stores) you are looking for.
+      //
+      //  l_locaPin is our reference point/location; where we are standing
+      //  or where our car currently currently sits.
+      //
+      //  l_response is whatever answer we got from the server.
+      //
+      var l_pinsRefArr = [];
+      var l_locaPin    = null;
+      var l_response;
+
+         // ///////////////////////////////////////////
+
+      L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+         maxZoom: 18,
+         id: 'mapbox/streets-v11',
+         access_token: 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw',
+         tileSize: 512,
+         zoomOffset: -1
+         }).addTo(l_mymap);
+
+
+      var PinIcon = L.Icon.extend({
+         options: {
+            iconAnchor:   [0, 0],
+            iconSize:     [30, 50]
+            }
+         });
+            //
+      var bluePin  = new PinIcon({iconUrl: "{{ url_for('static', filename=
+            './images/blue_pin.png')|autoversion}}"}),
+         orangePin = new PinIcon({iconUrl: "{{ url_for('static', filename=
+            './images/orange_pin.png')|autoversion}}"});
+
+      //  Passing an array, obviously.
+      //
+      //  This invocation sets the 'current location' pin, as we start the program.
+      //
+      // f_setLocaPin([40.585258, -105.084419]);
+      f_setLocaPin([40.5259, -104.9263]);
+
+         // ///////////////////////////////////////////
+
+      //  'e' is an event object, with properties for
+      //     e.latlng,       of type LatLng
+      //     e.latlng.lat    and
+      //     e.latlng.lng    of type float
+      //
+      //     marker() below will overload, but we always send an array for debugging
+      //
+      l_mymap.on('click', function(e){
+         f_setLocaPin([e.latlng.lat, e.latlng.lng]);
+         f_runQuery(e.latlng.lat, e.latlng.lng,
+            document.querySelector('#it_textFilter').value);
+         });
+      //  Sets our 'current location' pin
+      //
+      function f_setLocaPin(e) {
+         if (l_locaPin !== null) {
+            l_mymap.removeLayer(l_locaPin);
+            }
+
+         var txt = ("<b>This is your current location.</b><br>" + 
+            "CLICK anywhere else to change your current location.");
+         l_locaPin =  L.marker(e, {icon: orangePin})
+            .bindPopup(txt)
+            .addTo(l_mymap);
+         }
+
+         // ///////////////////////////////////////////
+
+      //  Sets all other pins, effectively; our data pins for the businesses
+      //  we return from query
+      //
+      function f_setDataPin(e, txt) {
+         // var strx = e.latlng;
+         // var l_pin = L.marker([strx.lat, strx.lng], {icon: bluePin}).addTo(l_mymap);
+         var l_pin = L.marker(e, {icon: bluePin}).addTo(l_mymap);
+            //
+         var l_pin_popup;
+            //
+         l_pin.on('mouseover', function(e) { 
+            l_pin_popup = L.popup({ offset: L.point(0,0)});
+               l_pin_popup.setContent(txt);
+               l_pin_popup.setLatLng(e.target.getLatLng());
+               l_pin_popup.openOn(l_mymap);
+               });
+         l_pin.on('mouseout', function(e) { 
+            l_mymap.closePopup(l_pin_popup);
+            });
+               //
+         l_pinsRefArr.push(l_pin);
+         }
+
+      //  Erase all of the data pins from the map
+      //
+      function f_clearDataPins() {
+         for (var i = 0; i < l_pinsRefArr.length; i++) {
+            l_mymap.removeLayer(l_pinsRefArr[i]);
+            }
+         l_pinsRefArr  = [];
+         }
+
+         // ///////////////////////////////////////////
+
+      //  AJAX function, calls to server to get businesses close to our
+      //  current location
+      //
+      function f_runQuery(i_lat, i_lng, i_textFilter) {
+         $.getJSON(
+            "/_do_query",
+            {
+            h_lat        : i_lat        ,
+            h_lng        : i_lng        ,
+            h_textFilter : i_textFilter
+            },
+            function(r_response) {
+               // To just see what is returned,
+               //
+               // var l_txt1 = JSON.stringify(r_response);
+               // alert(l_txt1);
+
+               l_response = r_response;
+                  //
+               f_onChange1();
+               }
+            );
+         };
+
+         // ///////////////////////////////////////////
+
+      //  Because we change what is displayed based on multiple events,
+      //  put this in a separate function.
+      //
+      function f_onChange1() {
+
+         f_clearDataPins();
+
+         l_currentSpeed   = document.querySelector('#slider_speed'  ).value 
+         l_currentCompass = document.querySelector('#slider_compass').value 
+            //
+         if (l_currentSpeed < 10) {
+            l_idx1 = "C0";
+         } else if (l_currentSpeed < 40) {
+            if (l_currentCompass == 0 || l_currentCompass == 360) {
+               l_idx1 = "N1";
+            } else if (l_currentCompass == 45 ) {
+               l_idx1 = "NE1";
+            } else if (l_currentCompass == 90 ) {
+               l_idx1 = "E1";
+            } else if (l_currentCompass == 135) {
+               l_idx1 = "SE1";
+            } else if (l_currentCompass == 180) {
+               l_idx1 = "S1";
+            } else if (l_currentCompass == 225) {
+               l_idx1 = "SW1";
+            } else if (l_currentCompass == 270) {
+               l_idx1 = "W1";
+            } else {
+               l_idx1 = "NW1";
+            }
+         } else {
+            if (l_currentCompass == 0 || l_currentCompass == 360) {
+               l_idx1 = "N2";
+            } else if (l_currentCompass == 45 ) {
+               l_idx1 = "NE2";
+            } else if (l_currentCompass == 90 ) {
+               l_idx1 = "E2";
+            } else if (l_currentCompass == 135) {
+               l_idx1 = "SE2";
+            } else if (l_currentCompass == 180) {
+               l_idx1 = "S2";
+            } else if (l_currentCompass == 225) {
+               l_idx1 = "SW2";
+            } else if (l_currentCompass == 270) {
+               l_idx1 = "W2";
+            } else {
+               l_idx1 = "NW2";
+            }
+         }
+
+         //  Format differently what we send to the HTML table builder.
+         //
+         var l_sendToHtmlTable = []
+            
+         //  Filter out our preferred direction (and consequentially,
+         //  our speed.
+         //
+         var l_filtered = l_response.filter(
+            each => each.l_idx1 == l_idx1);
+
+
+         //  Debugging, displayed in TAB-6  MMM
+         //
+         var my_cntr = 0;
+         const my_data = [
+            { l_idx1: "C0" , cntr: 0 },
+               //
+            { l_idx1: "N1" , cntr: 0 },
+            { l_idx1: "NE1", cntr: 0 },
+            { l_idx1: "E1" , cntr: 0 },
+            { l_idx1: "SE1", cntr: 0 },
+            { l_idx1: "S1" , cntr: 0 },
+            { l_idx1: "SW1", cntr: 0 },
+            { l_idx1: "W1" , cntr: 0 },
+            { l_idx1: "NW1", cntr: 0 },
+               //
+            { l_idx1: "N2" , cntr: 0 },
+            { l_idx1: "NE2", cntr: 0 },
+         { l_idx1: "E2" , cntr: 0 },
+            { l_idx1: "SE2", cntr: 0 },
+            { l_idx1: "S2" , cntr: 0 },
+            { l_idx1: "SW2", cntr: 0 },
+            { l_idx1: "W2" , cntr: 0 },
+            { l_idx1: "NW2", cntr: 0 },
+          ];
+         for (i = 0; i < l_response.length; i++) {
+            l_one = my_data.findIndex(({l_idx1}) => l_idx1 == l_response[i].l_idx1);
+            my_data[l_one].cntr++;
+            };
+         for (i = 0; i < my_data.length; i++) {
+            my_cntr = my_cntr + my_data[i].cntr;
+            };
+         //
+         //  Populating display fields.
+         //
+         document.getElementById("db_totalrows").value    = l_response.length;
+         document.getElementById("db_groupedrows").value  = my_cntr;
+         document.getElementById("db_filteredrows").value = l_filtered.length;
+         document.getElementById("db_direction").value    = l_idx1;
+            //
+         document.getElementById("db_C0").value           = 
+            my_data[my_data.findIndex(({l_idx1}) => l_idx1 == "C0")].cntr;
+         document.getElementById("db_N1").value           = 
+            my_data[my_data.findIndex(({l_idx1}) => l_idx1 == "N1")].cntr;
+         document.getElementById("db_NE1").value          = 
+            my_data[my_data.findIndex(({l_idx1}) => l_idx1 == "NE1")].cntr;
+         document.getElementById("db_E1").value           = 
+            my_data[my_data.findIndex(({l_idx1}) => l_idx1 == "E1")].cntr;
+         document.getElementById("db_SE1").value          = 
+            my_data[my_data.findIndex(({l_idx1}) => l_idx1 == "SE1")].cntr;
+         document.getElementById("db_S1").value           = 
+            my_data[my_data.findIndex(({l_idx1}) => l_idx1 == "S1")].cntr;
+         document.getElementById("db_SW1").value          = 
+            my_data[my_data.findIndex(({l_idx1}) => l_idx1 == "SW1")].cntr;
+         document.getElementById("db_W1").value           = 
+            my_data[my_data.findIndex(({l_idx1}) => l_idx1 == "W1")].cntr;
+         document.getElementById("db_NW1").value          = 
+            my_data[my_data.findIndex(({l_idx1}) => l_idx1 == "NW1")].cntr;
+         document.getElementById("db_N2").value           = 
+            my_data[my_data.findIndex(({l_idx1}) => l_idx1 == "N2")].cntr;
+         document.getElementById("db_NE2").value          = 
+            my_data[my_data.findIndex(({l_idx1}) => l_idx1 == "NE2")].cntr;
+         document.getElementById("db_E2").value           = 
+            my_data[my_data.findIndex(({l_idx1}) => l_idx1 == "E2")].cntr;
+         document.getElementById("db_SE2").value          = 
+            my_data[my_data.findIndex(({l_idx1}) => l_idx1 == "SE2")].cntr;
+         document.getElementById("db_S2").value           = 
+            my_data[my_data.findIndex(({l_idx1}) => l_idx1 == "S2")].cntr;
+         document.getElementById("db_SW2").value          = 
+            my_data[my_data.findIndex(({l_idx1}) => l_idx1 == "SW2")].cntr;
+         document.getElementById("db_W2").value           = 
+            my_data[my_data.findIndex(({l_idx1}) => l_idx1 == "W2")].cntr;
+         document.getElementById("db_NW2").value          = 
+            my_data[my_data.findIndex(({l_idx1}) => l_idx1 == "NW2")].cntr;
+
+
+         //  Filling the HTML table of resultant rows.
+         //
+         for (i = 0; i < l_filtered.length; i++) {
+            l_latLng = [ parseFloat(l_filtered[i]["md_lat"]),
+               parseFloat(l_filtered[i]["md_lng"]) ];
+                  //
+            l_name     = l_filtered[i]["md_name"       ];
+            l_subCat   = l_filtered[i]["md_subcategory"];
+            l_addr     = l_filtered[i]["md_address"    ];
+            l_city     = l_filtered[i]["md_city"       ];
+            l_province = l_filtered[i]["md_province"   ];
+            l_phone    = l_filtered[i]["md_phone"      ];
+               //
+            l_ballTxt  = "<b>" + l_name + "</b><br>" +
+               l_subCat + "<br>" + l_addr + ", " + l_city + ", " +
+               l_province + "<br><br>" + l_phone;
+                  //
+            f_setDataPin(l_latLng, l_ballTxt);
+                  //
+            l_sendToHtmlTable.push( {h_name: l_name, h_latLng: l_latLng, h_ballTxt: l_ballTxt} );
+            }
+
+         //  Call to render HTML table
+         //
+         f_buildHtmlTable(l_sendToHtmlTable);
+
+         };
+
+         // ///////////////////////////////////////////
+
+         //  Called only from the text entry field (filter)
+         //
+         function f_onChange2() {
+
+            f_runQuery(l_locaPin.getLatLng().lat, l_locaPin.getLatLng().lng,
+               document.querySelector('#it_textFilter').value);
+
+         }
+
+         // ///////////////////////////////////////////
+
+   </script>
+
+
+   <!-- --------------------------------------------------------
+   Start the TABbed divs.
+   --------------------------------------------------------- -->
+
+   <br>
+   <br>
+
+   <ul class="tab">
+      <li><a href="javascript:void(0)" class="tablinks"
+         onclick="openDiv(event, 'div_1')"
+         id="li_tab1"     >Results Table             </a></li>
+      <li><a href="javascript:void(0)" class="tablinks"
+         onclick="openDiv(event, 'div_2' )"
+         id="li_tab2"    >Solr/Lucene Model          </a></li>
+      <li><a href="javascript:void(0)" class="tablinks"
+         onclick="openDiv(event, 'div_3' )"
+         id="li_tab3"    >GeoHash, Directional       </a></li>
+      <li><a href="javascript:void(0)" class="tablinks"
+         onclick="openDiv(event, 'div_4' )"
+         id="li_tab4"    >Model => Quadrants         </a></li>
+      <li><a href="javascript:void(0)" class="tablinks"
+         onclick="openDiv(event, 'div_5' )"
+         id="li_tab5"    >Model => Parallel Groupings</a></li>
+      <li><a href="javascript:void(0)" class="tablinks"
+         onclick="openDiv(event, 'div_6' )"
+         id="li_tab6"    >Debug-1                    </a></li>
+   </ul>
+
+
+   <!-- -- DIV 1 ----------------------------------------- -->
+
+
+   <div id="div_1" class="tabcontent">
+      <br>
+      <h4>
+         Results Table: After any query you run above, an HTML table
+         below will be populated with data from your query.
+      </h4>
+      <br>
+      <br>
+      <table id="t_queryData" class="tab_table" cellspacing="0"
+         width="80%" align="center">
+      </table>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+   </div>
+
+   <script>
+
+      function f_buildHtmlTable(i_tableData) {
+            //
+         document.getElementById("t_queryData").deleteTHead() ;
+         document.getElementById("t_queryData").innerHTML = "";
+            //
+         var l_tabl = document.getElementById("t_queryData");
+         var l_head = l_tabl.createTHead();
+         var l_hrow = l_head.insertRow(0);
+            //
+         var l_cell = l_hrow.insertCell(0);
+         l_cell.innerHTML = "<b>" + "Name"         + "</b>";
+         var l_cell = l_hrow.insertCell(1);
+         l_cell.innerHTML = "<b>" + "Location"     + "</b>";
+         var l_cell = l_hrow.insertCell(2);
+         l_cell.innerHTML = "<b>" + "Description"  + "</b>";
+            //
+         for (i = 0; i < i_tableData.length; i++) {
+               //
+            var l_brow = l_tabl.insertRow(i+1);
+            var l_data = i_tableData[i];
+               //
+            var l_cell = l_brow.insertCell(0);
+            var l_col1 = l_data["h_name"];
+            l_cell.innerHTML = l_col1;
+               //
+            var l_cell = l_brow.insertCell(1);
+            var l_col1 = l_data["h_latLng"];
+            l_cell.innerHTML = l_col1;
+               //
+            var l_cell = l_brow.insertCell(2);
+            var l_col2 = l_data["h_ballTxt"];
+            l_cell.innerHTML = l_col2;
+            }
+         };
+
+   </script>
+
+
+   <!-- -- DIV 2 ----------------------------------------- -->
+
+
+   <div id="div_2" class="tabcontent">
+      <br>
+      <br>
+      <img src="{{ url_for('static', filename=
+         './images/geohash0.png')|autoversion}}"
+         width="1093" height="498">
+      <br>
+      <br>
+      <br>
+      <br>
+   </div>
+
+
+   <!-- -- DIV 3 ----------------------------------------- -->
+
+
+   <div id="div_3" class="tabcontent">
+      <br>
+      <br>
+      <img src="{{ url_for('static', filename=
+         './images/geohash3.png')|autoversion}}"
+         width="1093" height="498">
+      <br>
+      <br>
+      <br>
+      <br>
+   </div>
+
+
+   <!-- -- DIV 4 ----------------------------------------- -->
+
+
+   <div id="div_4" class="tabcontent">
+      <br>
+      <br>
+      <img src="{{ url_for('static', filename=
+         './images/geohash1.png')|autoversion}}"
+         width="1093" height="498">
+      <br>
+      <br>
+      <br>
+      <br>
+   </div>
+
+
+   <!-- -- DIV 5 ----------------------------------------- -->
+
+
+   <div id="div_5" class="tabcontent">
+      <br>
+      <br>
+      <img src="{{ url_for('static', filename=
+         './images/geohash2.png')|autoversion}}"
+         width="1093" height="498">
+      <br>
+      <br>
+      <br>
+      <br>
+   </div>
+
+
+   <!-- -- DIV 6 ----------------------------------------- -->
+
+
+   <div id="div_6" class="tabcontent">
+
+      <!-- MMM -->
+      <br>
+      <br>
+
+      &nbsp&nbsp&nbsp&nbsp
+      <h2>Debugging of the rows returned from a query (pin placement) ...</h2>
+
+      <table border=0>
+         <tr>
+            <td style="width:200px">
+            &nbsp&nbsp&nbsp&nbsp
+            Total rows of data:
+            </td>
+            <td style="width:200px">
+            &nbsp&nbsp&nbsp&nbsp
+            <input type="text" id="db_totalrows" size="32" readonly>
+            </td>
+         </tr>
+         <tr>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            Grouped rows of data:
+            </td>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            <input type="text" id="db_groupedrows" size="32" readonly>
+            </td>
+         </tr>
+         <tr>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            Filtered rows of data:
+            </td>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            <input type="text" id="db_filteredrows" size="32" readonly>
+            </td>
+         </tr>
+         <tr>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            </td>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            </td>
+         </tr>
+         <tr>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            Direction:
+            </td>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            <input type="text" id="db_direction" size="32" readonly>
+            </td>
+         </tr>
+         <tr>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            </td>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            </td>
+         </tr>
+
+         <tr>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            Direction/C0:
+            </td>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            <input type="text" id="db_C0" size="32" readonly>
+            </td>
+         </tr>
+         <tr>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            Direction/N1:
+            </td>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            <input type="text" id="db_N1" size="32" readonly>
+            </td>
+         </tr>
+         <tr>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            Direction/NE1:
+            </td>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            <input type="text" id="db_NE1" size="32" readonly>
+            </td>
+         </tr>
+         <tr>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            Direction/E1:
+            </td>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            <input type="text" id="db_E1" size="32" readonly>
+            </td>
+         </tr>
+         <tr>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            Direction/SE1:
+            </td>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            <input type="text" id="db_SE1" size="32" readonly>
+            </td>
+         </tr>
+         <tr>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            Direction/S1:
+            </td>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            <input type="text" id="db_S1" size="32" readonly>
+            </td>
+         </tr>
+         <tr>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            Direction/SW1:
+            </td>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            <input type="text" id="db_SW1" size="32" readonly>
+            </td>
+         </tr>
+         <tr>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            Direction/W1:
+            </td>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            <input type="text" id="db_W1" size="32" readonly>
+            </td>
+         </tr>
+         <tr>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            Direction/NW1:
+            </td>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            <input type="text" id="db_NW1" size="32" readonly>
+            </td>
+         </tr>
+
+         <tr>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            Direction/N2:
+            </td>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            <input type="text" id="db_N2" size="32" readonly>
+            </td>
+         </tr>
+         <tr>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            Direction/NE2:
+            </td>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            <input type="text" id="db_NE2" size="32" readonly>
+            </td>
+         </tr>
+         <tr>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            Direction/E2:
+            </td>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            <input type="text" id="db_E2" size="32" readonly>
+            </td>
+         </tr>
+         <tr>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            Direction/SE2:
+            </td>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            <input type="text" id="db_SE2" size="32" readonly>
+            </td>
+         </tr>
+         <tr>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            Direction/S2:
+            </td>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            <input type="text" id="db_S2" size="32" readonly>
+            </td>
+         </tr>
+         <tr>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            Direction/SW2:
+            </td>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            <input type="text" id="db_SW2" size="32" readonly>
+            </td>
+         </tr>
+         <tr>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            Direction/W2:
+            </td>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            <input type="text" id="db_W2" size="32" readonly>
+            </td>
+         </tr>
+         <tr>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            Direction/NW2:
+            </td>
+            <td>
+            &nbsp&nbsp&nbsp&nbsp
+            <input type="text" id="db_NW2" size="32" readonly>
+            </td>
+         </tr>
+      </table>
+
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+
+   </div>
+
+
+   <!-- -------------------------------------------------- -->
+
+
+   <!--
+   This code is for the TABbed divs; makes TAB 1 appear on page load.
+   -->
+   <script type="text/javascript">
+      document.getElementById("li_tab1" ).click();
+   </script>
+
+
+   <!-- -------------------------------------------------- -->
+
+
+</body>
+
+
+</html>
+
+
+
+
