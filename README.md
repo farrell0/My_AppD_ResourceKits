@@ -1,4 +1,4 @@
-My AppDynamics -- Resource Kits
+My Cisco/AppDynamics -- Resource Kits
 ===================
 
 | **[vers. 0.6.alpha](https://github.com/farrell0/My_AppD_ResourceKits/blob/master/README.md)**| **[vers. 0.7 - Coming](https://github.com/farrell0/My_AppD_ResourceKits/blob/master/v.0.7/README.md)**|
