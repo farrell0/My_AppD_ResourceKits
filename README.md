@@ -1,9 +1,6 @@
 
-<h1>
-Your customer complains that the public Web site is slow.
-<br />
-Find the root cause, and fix it.
-</h1>
+<h1>Your customer complains that the public Web site is slow.</h1>
+<h2>Find the root cause, and fix it.</h2>
 
 <br />
 <br />
