@@ -6,10 +6,13 @@ My AppDynamics -- Resource Kits
 
 This is a personal blog where I post programs, data files, other (a Resource Kit), used in the delivery of serveral "Lunch and Learns" using the Cisco/AppDynamics full stack observability platform. 
 
-vers. 0.6.alpha - -  Python single page Web app, additional readers and writers, MongoDB in a 2-node replica set
+
+vers. 0.6.alpha - -  Python single page Web app, MongoDB database in a 2-node replica set, additional readers and writers, and more.
+
 
 >Problem Statement:
->The customer complains that the public Web site is slow. Find the root cause, and fix it.
+>
+>Your customer complains that the public Web site is slow. Find the root cause, and fix it.
 >
 >Resource Kit contents:
 >
