@@ -1,0 +1,15 @@
+
+
+
+   Getting the MongoDB Python driver, other
+   ===========================================================
+
+   pip install flask
+   pip install pymongo
+   pip install libgeohash
+
+
+
+
+
+
