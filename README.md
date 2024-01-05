@@ -1,5 +1,7 @@
 
-![Screenshot]([screenshot.png](https://github.com/farrell0/My_AppD_ResourceKits/blob/main/images/14_AppDConsole.png))
+<p align="center">
+  <img src="[your_relative_path_here](https://github.com/farrell0/My_AppD_ResourceKits/blob/main/images/14_AppDConsole.png)" width="350" title="AppDynamics Console, Applications">
+</p>
 
 My Cisco/AppDynamics -- Resource Kits
 ===================
