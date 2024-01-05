@@ -1,7 +1,6 @@
 
-<p align="center">
-  <img src="[your_relative_path_here](https://github.com/farrell0/My_AppD_ResourceKits/blob/main/images/14_AppDConsole.png)" width="350" title="AppDynamics Console, Applications">
-</p>
+![image](https://github.com/farrell0/My_AppD_ResourceKits/assets/8783666/e4947ba8-e0b3-482d-8a96-8ce64750e4bd)
+
 
 My Cisco/AppDynamics -- Resource Kits
 ===================
