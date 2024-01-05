@@ -18,7 +18,7 @@ vers. 0.6.alpha - -  Python single page Web app, MongoDB database in a 2-node re
 >
 >.  Runners for every command; no coding required, every non-AppD function is scripted/automated.
 >
->.  Bigger footprint, (sorry); this exercise expects 6 (count) local VMs at 4GM RAM, 3 Cores each, static IPs. We also expect a cloud hosted AppD system.
+>.  Bigger footprint, (sorry); this exercise expects 6 (count) local VMs at 4GM RAM, 2 Cores, static IPs, for each box. We also expect a cloud hosted AppD system.
 >
 >.  From the above, we run; 2 nodes of MongoDB in a primary/seconday (HA) config, a node for AppD DB Agents and the AppD Web Console, and 3 more nodes for a Python/Flask Web server, one Python reader client, and one Python writer client.
 >
