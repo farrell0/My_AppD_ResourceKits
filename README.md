@@ -1,3 +1,6 @@
+
+![Screenshot]([screenshot.png](https://github.com/farrell0/My_AppD_ResourceKits/blob/main/images/14_AppDConsole.png))
+
 My Cisco/AppDynamics -- Resource Kits
 ===================
 
@@ -26,3 +29,5 @@ vers. 0.6.alpha - -  Python single page Web app, MongoDB database in a 2-node re
 >
 >.  Net/net; find what's wrong with the Web app. Everything that is wrong is repairable with a tunable that the Web app will implement.
 >
+
+
