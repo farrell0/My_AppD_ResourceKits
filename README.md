@@ -1,7 +1,7 @@
 My AppDynamics -- Resource Kits
 ===================
 
-| **[vers. 0.6.alpha - Python SPA, MongoDB, Find the performance problem](https://github.com/farrell0/My_AppD_ResourceKits/blob/master/README.md)**| **[vers. 0.7 - Coming](https://github.com/farrell0/My_AppD_ResourceKits/blob/master/v.0.7/README.md)**|
+| **[vers. 0.6.alpha](https://github.com/farrell0/My_AppD_ResourceKits/blob/master/README.md)**| **[vers. 0.7 - Coming](https://github.com/farrell0/My_AppD_ResourceKits/blob/master/v.0.7/README.md)**|
 |-------------------------|--------------------------|
 
 This is a personal blog where I post programs, data files, other (a Resource Kit), used in the delivery of serveral "Lunch and Learns" using the Cisco/AppDynamics full stack observability platform. 
